@@ -1,0 +1,42 @@
+@media (max-width: 620px) {
+  .dialog-body {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-img img {
+    width: 180px;
+  }
+}
+
+@media (max-width: 400px) {
+  .dialog-title {
+    font-size: 18px;
+  }
+
+  .dialog-img img {
+    width: 150px;
+  }
+}
+
+@media (max-width: 400px) {
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+  }
+}

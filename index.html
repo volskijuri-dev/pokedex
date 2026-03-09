@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pokedex</title>
+    <link rel="icon" type="image/png" href="./assets/png/favicon.png" />
+    <link rel="stylesheet" href="./styles/style.css" />
+    <link rel="stylesheet" href="./styles/responsive.css" />
+    <link rel="stylesheet" href="./styles/type_icon.css" />
+    <link rel="stylesheet" href="./styles/key_frames.css">
+    <link rel="stylesheet" href="./styles/standart.css">
+
+</head>
+
+<body onload="init()">
+    <header class="header">
+        <div class="header-content">
+            <h1>POKEDEX</h1>
+            <input type="search" title="Enter at least 3 letters" id="searchBar" placeholder="Pokémon Search"
+                oninput="searchPokemon()" />
+        </div>
+    </header>
+
+    <div class="pokemon-ticker">
+        <div id="pokemonTicker" class="ticker-track"></div>
+    </div>
+
+    <main class="page_content">
+        <div id="loading" class="LOAD hidden">
+            <div class="pokeball2" aria-label="Loading Pokeball">
+                <div class="pokeball2__top"></div>
+                <div class="pokeball2__band"></div>
+                <div class="pokeball2__bottom"></div>
+                <div class="pokeball2__button"></div>
+            </div>
+            <p class="loader-p">Loading...</p>
+        </div>
+
+        <p id="Attention" class="Attention hidden">Attention, loud noises!</p>
+
+        <div id="pokedex" class="pokedex"></div>
+
+        <button id="loadButton" class="more" onclick="loadMore()">
+            <p class="p_load">Load More</p>
+        </button>
+
+        <dialog id="dialogpokemon" class="pokemon-dialog"></dialog>
+
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <img src="./assets/png/favicon.png" alt="Pokeball">
+            <p class="Pokeball"> Pokeball</p>
+            <p class="made">
+                Made by <a class="foot_a" href="#" target="_blank" rel="noopener">Juri Volski</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="./scripts/script.js"></script>
+    <script src="./scripts/template.js"></script>
+    <script src="./scripts/sounds.js"></script>
+</body>
+
+</html>

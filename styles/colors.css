@@ -1,0 +1,62 @@
+:root {
+    --grass: #5dbb63;
+    --poison: #8e44ad;
+    --fire: #f39c12;
+    --water: #3498db;
+    --bug: #95a51b;
+    --normal: #95a5a6;
+    --electric: #f1c40f;
+    --ground: #cfa55b;
+    --fairy: #ff7eb6;
+    --fighting: #e74c3c;
+    --psychic: #ff5a8a;
+    --rock: #b09f6b;
+    --ghost: #6c5ce7;
+    --ice: #74d0f6;
+    --dragon: #2c3e50;
+    --dark: #2d3436;
+    --steel: #7f8c8d;
+    --flying: #81b9ef;
+}
+
+
+.card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, .35);
+}
+
+.card {
+    background: linear-gradient(135deg, var(--c1, var(--card)), var(--c2, var(--card))) !important;
+}
+
+.card .name {
+    background: rgba(0, 0, 0, .35);
+}
+
+.card .name {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.card[data-type1="grass"][data-type2="poison"] {
+    background: linear-gradient(135deg, var(--grass), var(--poison));
+}
+
+.card[data-type1="fire"][data-type2="flying"] {
+    background: linear-gradient(135deg, var(--fire), var(--flying));
+}
+
+.card[data-type1="bug"][data-type2="flying"] {
+    background: linear-gradient(135deg, var(--bug), var(--flying));
+}
+
+.card[data-type1="water"][data-type2="ice"] {
+    background: linear-gradient(135deg, var(--water), var(--ice));
+}
+
+.card[data-type1="grass"][data-type2="flying"] {
+    background: linear-gradient(135deg, var(--grass), var(--flying));
+}
