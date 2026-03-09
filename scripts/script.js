@@ -6,11 +6,13 @@ const loadingEl = document.getElementById("loading");
 const attentionEl = document.getElementById("Attention");
 const searchEl = document.getElementById("searchBar");
 const dialogEl = document.getElementById("dialogpokemon");
+const searchResultsEl = document.getElementById("searchResults");
 
 let nextUrl = `${API}/pokemon?limit=15&offset=0`;
 let cache = [];
 let currentSearch = "";
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+let lastScrollY = 0;
 let allPokemonList = [];
 
 const TYPE_COLORS = {
@@ -42,21 +44,13 @@ async function loadAllPokemonList() {
 function showLoader() {
   loadingEl.classList.remove("hidden");
   document.body.classList.add("loading");
-}
-
-function hideLoader() {
-  loadingEl.classList.add("hidden");
-  document.body.classList.remove("loading");
-}
-
-function showLoader() {
-  loadingEl.classList.remove("hidden");
   pokedexEl.classList.add("is-loading");
   loadBtn.classList.add("is-loading");
 }
 
 function hideLoader() {
   loadingEl.classList.add("hidden");
+  document.body.classList.remove("loading");
   pokedexEl.classList.remove("is-loading");
   loadBtn.classList.remove("is-loading");
 }
@@ -129,31 +123,50 @@ async function searchPokemon() {
 
   if (value.length === 0) {
     currentSearch = "";
+    searchResultsEl.classList.add("hidden");
+    pokedexEl.classList.remove("hidden");
     loadBtn.style.display = nextUrl ? "block" : "none";
-    render();
     return;
   }
 
   if (value.length < 3) {
-    currentSearch = "__HIDE__";
-    loadBtn.style.display = "none";
-    render();
+    searchResultsEl.classList.remove("hidden");
+    pokedexEl.classList.add("hidden");
+    searchResultsEl.innerHTML = "";
     return;
   }
 
-  currentSearch = value;
   loadBtn.style.display = "none";
 
-  const cachedMatches = cache.some(
+  let results = cache.filter(
     p => p.name.includes(value) || String(p.id).includes(value)
   );
 
-  if (!cachedMatches) {
+  if (!results.length && allPokemonList.length) {
     await loadMissingPokemon(value);
+
+    results = cache.filter(
+      p => p.name.includes(value) || String(p.id).includes(value)
+    );
   }
 
-  render();
+  pokedexEl.classList.add("hidden");
+  searchResultsEl.classList.remove("hidden");
+
+  renderSearchResults(results);
 }
+
+function renderSearchResults(list) {
+
+  if (!list.length) {
+    searchResultsEl.innerHTML = `<p class="no-results">Kein Pokémon gefunden.</p>`;
+    return;
+  }
+
+  searchResultsEl.innerHTML = list.map(cardTemplate).join("");
+  applyTypeGradients();
+}
+
 
 async function fetchJson(url) {
   const res = await fetch(url);
