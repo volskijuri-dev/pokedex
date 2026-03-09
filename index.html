@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="de">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -9,17 +8,21 @@
     <link rel="stylesheet" href="./styles/style.css" />
     <link rel="stylesheet" href="./styles/responsive.css" />
     <link rel="stylesheet" href="./styles/type_icon.css" />
-    <link rel="stylesheet" href="./styles/key_frames.css">
-    <link rel="stylesheet" href="./styles/standart.css">
-
+    <link rel="stylesheet" href="./styles/key_frames.css" />
+    <link rel="stylesheet" href="./styles/standart.css" />
 </head>
 
 <body onload="init()">
     <header class="header">
         <div class="header-content">
             <h1>POKEDEX</h1>
-            <input type="search" title="Enter at least 3 letters" id="searchBar" placeholder="Pokémon Search"
-                oninput="searchPokemon()" />
+            <input
+                type="search"
+                title="Enter at least 3 letters"
+                id="searchBar"
+                placeholder="Pokémon Search"
+                oninput="searchPokemon()"
+            />
         </div>
     </header>
 
@@ -38,7 +41,7 @@
             <p class="loader-p">Loading...</p>
         </div>
 
-        <p id="Attention" class="Attention hidden">Attention, loud noises!</p>
+        <p id="Attention" class="Attention hidden"></p>
 
         <div id="pokedex" class="pokedex"></div>
 
@@ -47,13 +50,12 @@
         </button>
 
         <dialog id="dialogpokemon" class="pokemon-dialog"></dialog>
-
     </main>
 
     <footer class="footer">
         <div class="footer-content">
-            <img src="./assets/png/favicon.png" alt="Pokeball">
-            <p class="Pokeball"> Pokeball</p>
+            <img src="./assets/png/favicon.png" alt="Pokeball" />
+            <p class="Pokeball">Pokeball</p>
             <p class="made">
                 Made by <a class="foot_a" href="#" target="_blank" rel="noopener">Juri Volski</a>
             </p>
@@ -64,5 +66,4 @@
     <script src="./scripts/template.js"></script>
     <script src="./scripts/sounds.js"></script>
 </body>
-
 </html>

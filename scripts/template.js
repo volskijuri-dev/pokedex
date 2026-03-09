@@ -1,36 +1,12 @@
 function statRow(label, value, max = 180) {
   const pct = Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+
   return `
     <div class="stat">
       <div>${label}</div>
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div style="text-align:right;opacity:.9">${value}</div>
     </div>
-  `;
-}
-
-function cardTemplate(p) {
-
-  const mainType = p.types?.[0] ?? "normal";
-  const secondType = p.types?.[1] ?? "";
-
-  return `
-    <article class="card"
-      data-id="${p.id}"
-      data-type1="${mainType}"
-      data-type2="${secondType}"
-      style="animation-delay:${p.id * 0.03}s"
-      onclick="openDialog(${p.id})">
-
-      <div class="dex-number">${formatDexNumber(p.id)}</div>
-
-      ${favoriteIcon(p.id)}
-      ${cardName(p)}
-      ${cardImage(p)}
-      ${cardTypes(p)}
-      ${cardIcons(mainType, secondType)}
-
-    </article>
   `;
 }
 
@@ -63,7 +39,7 @@ function cardImage(p) {
 function cardTypes(p) {
   return `
     <div class="types">
-      ${p.types.map(t => `<span class="badge" data-type="${t}">${t}</span>`).join("")}
+      ${p.types.map((t) => `<span class="badge" data-type="${t}">${t}</span>`).join("")}
     </div>
   `;
 }
@@ -77,56 +53,51 @@ function cardIcons(mainType, secondType) {
   `;
 }
 
-function render() {
+function cardTemplate(p) {
+  const mainType = p.types?.[0] ?? "normal";
+  const secondType = p.types?.[1] ?? "";
 
-  const q = currentSearch.trim().toLowerCase();
-  let list = cache;
+  return `
+    <article class="card"
+      data-id="${p.id}"
+      data-type1="${mainType}"
+      data-type2="${secondType}"
+      style="animation-delay:${p.id * 0.03}s"
+      onclick="openDialog(${p.id})">
 
-  if (q.length >= 3) {
-    list = cache.filter(p =>
-      p.name.includes(q) || String(p.id).includes(q)
-    );
-  }
+      <div class="dex-number">${formatDexNumber(p.id)}</div>
 
-  pokedexEl.innerHTML = list.map(cardTemplate).join("");
+      ${favoriteIcon(p.id)}
+      ${cardName(p)}
+      ${cardImage(p)}
+      ${cardTypes(p)}
+      ${cardIcons(mainType, secondType)}
 
-  applyTypeGradients();
-}
-
-function applyTypeGradients() {
-  document.querySelectorAll(".card").forEach(card => {
-
-    const t1 = card.dataset.type1 || "normal";
-    const t2 = card.dataset.type2 || "";
-
-    const c1 = TYPE_COLORS[t1] || TYPE_COLORS.normal;
-    const c2 = TYPE_COLORS[t2] || c1;
-
-    card.style.setProperty("--c1", c1);
-    card.style.setProperty("--c2", c2);
-
-  });
+    </article>
+  `;
 }
 
 function buildDialogHTML(p, evolution) {
-
   const typeBadges = p.types
-    .map(t => `<span class="badge" data-type="${t}">${t}</span>`)
+    .map((t) => `<span class="badge" data-type="${t}">${t}</span>`)
     .join(" ");
 
-  const evolutionHTML = evolution
-    .map(name => `<span class="evo-item">${cap(name)}</span>`)
-    .join(" ➜ ");
+  const evolutionHTML = evolution.length
+    ? evolution.map((name) => `<span class="evo-item">${cap(name)}</span>`).join(" ➜ ")
+    : `<span class="evo-item">Keine Daten</span>`;
+
+  const hasPrev = p.id > 1;
+  const hasNext = cache.some((x) => x.id === p.id + 1) || !!nextUrl;
 
   return `
     <div class="dialog-top">
-      <button class="nav-btn" onclick="showPrevious(${p.id})">←</button>
+      <button class="nav-btn" onclick="showPrevious(${p.id})" ${!hasPrev ? "disabled" : ""}>←</button>
 
       <h2 class="dialog-title">
         ${p.nameCap} <span style="opacity:.7">#${String(p.id).padStart(3, "0")}</span>
       </h2>
 
-      <button class="nav-btn" onclick="showNext(${p.id})">→</button>
+      <button class="nav-btn" onclick="showNext(${p.id})" ${!hasNext ? "disabled" : ""}>→</button>
       <button class="dialog-close" onclick="closeDialog()">✕</button>
     </div>
 
@@ -138,19 +109,12 @@ function buildDialogHTML(p, evolution) {
     <div class="meta">${typeBadges}</div>
 
     <div class="dialog-body">
-
-
-
       <div class="dialog-img">
-  <img src="${p.sprite}" alt="${p.nameCap}">
-
-  <button class="cry-btn" onclick="playPokemonCry(${p.id})">
-    🔊
-  </button>
-</div>
+        <img src="${p.sprite}" alt="${p.nameCap}">
+        <button class="cry-btn" onclick="playPokemonCry(${p.id})">🔊</button>
+      </div>
 
       <div>
-
         <div class="meta">
           Größe: <b>${toMeters(p.heightDm)} m</b> •
           Gewicht: <b>${toKg(p.weightHg)} kg</b>
@@ -164,16 +128,15 @@ function buildDialogHTML(p, evolution) {
           ${statRow("Sp. Def", p.stats.spDefense)}
           ${statRow("Speed", p.stats.speed)}
         </div>
-
       </div>
     </div>
   `;
 }
 
 async function openDialog(id) {
-  playPokemonCry(id);
   lastScrollY = window.scrollY;
-  const p = cache.find(x => x.id === id);
+
+  const p = cache.find((x) => x.id === id);
   if (!p) return;
 
   const evolution = await fetchEvolutionChain(id);
@@ -183,30 +146,31 @@ async function openDialog(id) {
   dialogEl.showModal();
 }
 
-function closeDialog() {
-  dialogEl.close();
-  if (document.activeElement) {
-    document.activeElement.blur();
-  }
-  setTimeout(() => {
-    window.scrollTo({
-      top: lastScrollY,
-      behavior: "auto"
-    });
-  }, 0);
-}
-
-
-
 function renderTicker() {
-
   const ticker = document.getElementById("pokemonTicker");
 
-  ticker.innerHTML = cache.map(p => `
+  const html = cache.map((p) => `
     <div class="ticker-item">
       <img src="${p.sprite}" alt="${p.name}">
       <span>${p.nameCap}</span>
     </div>
   `).join("");
 
+  ticker.innerHTML = html + html;
+}
+
+function renderTicker() {
+const ticker = document.getElementById("pokemonTicker");
+if (!cache.length) return;
+const items = cache.map(p => `
+    <div class="ticker-item">
+      <img src="${p.sprite}" alt="${p.name}">
+      <span>${p.nameCap}</span>
+    </div>
+  `).join("");
+  ticker.innerHTML = items + items;
+  const itemCount = cache.length;
+  const duration = Math.max(40, itemCount * 4);
+
+  ticker.style.animationDuration = `${duration}s`;
 }

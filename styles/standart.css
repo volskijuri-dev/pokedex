@@ -14,7 +14,9 @@ body {
     font-family: system-ui, Segoe UI, Roboto, Arial;
     background: var(--bg);
     color: #fff;
-
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
@@ -41,11 +43,10 @@ body {
     max-width: 60vw;
     padding: 10px 12px;
     border-radius: 8px;
-    bottom: 0;
+    border: 0;
 }
 
 .footer {
-    position: absolute;
     width: 100%;
     background: var(--top);
     margin-top: 28px;
@@ -61,16 +62,16 @@ body {
     align-items: center;
     justify-content: center;
     gap: 15px;
+}
 
-    img {
-        width: 40px;
-        height: 40px;
-    }
+.footer-content img {
+    width: 40px;
+    height: 40px;
+}
 
-    p {
-        font-size: 18px;
-        font-weight: bold;
-    }
+.footer-content p {
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .foot_a {

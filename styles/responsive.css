@@ -39,4 +39,8 @@
     display: flex;
     flex-direction: column;
   }
+
+    .ticker-track{
+    animation-duration: 80s;
+  }
 }
