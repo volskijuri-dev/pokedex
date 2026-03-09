@@ -11,7 +11,7 @@ let nextUrl = `${API}/pokemon?limit=15&offset=0`;
 let cache = [];
 let currentSearch = "";
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-let lastScrollY = 0;
+let allPokemonList = [];
 
 const TYPE_COLORS = {
   normal: "#95a5a6",
@@ -33,6 +33,11 @@ const TYPE_COLORS = {
   steel: "#7f8c8d",
   fairy: "#ff7eb6",
 };
+
+async function loadAllPokemonList() {
+  const data = await fetchJson(`${API}/pokemon?limit=100000&offset=0`);
+  allPokemonList = data.results;
+}
 
 function showLoader() {
   loadingEl.classList.remove("hidden");
@@ -90,18 +95,63 @@ function toggleFavorite(id) {
   }
 }
 
-function searchPokemon() {
-  currentSearch = searchEl.value.trim().toLowerCase();
+async function loadMissingPokemon(value) {
 
-  if (currentSearch.length > 0 && currentSearch.length < 3) {
-    showAttention("Bitte mindestens 3 Buchstaben eingeben.");
+  const matches = allPokemonList
+    .filter(p => p.name.includes(value))
+    .slice(0, 20);
+
+  if (!matches.length) return;
+
+  showLoader();
+
+  try {
+    const details = await Promise.all(matches.map(p => fetchJson(p.url)));
+    const mapped = details.map(mapDetails);
+
+    mapped.forEach(pokemon => {
+      if (!cache.some(c => c.id === pokemon.id)) {
+        cache.push(pokemon);
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    showAttention("Fehler bei der Suche.");
+  } finally {
+    hideLoader();
+  }
+}
+
+async function searchPokemon() {
+
+  const value = searchEl.value.trim().toLowerCase();
+
+  if (value.length === 0) {
+    currentSearch = "";
+    loadBtn.style.display = nextUrl ? "block" : "none";
+    render();
+    return;
+  }
+
+  if (value.length < 3) {
+    currentSearch = "__HIDE__";
     loadBtn.style.display = "none";
     render();
     return;
   }
 
-  hideAttention();
-  loadBtn.style.display = nextUrl && currentSearch.length === 0 ? "block" : "none";
+  currentSearch = value;
+  loadBtn.style.display = "none";
+
+  const cachedMatches = cache.some(
+    p => p.name.includes(value) || String(p.id).includes(value)
+  );
+
+  if (!cachedMatches) {
+    await loadMissingPokemon(value);
+  }
+
   render();
 }
 
@@ -153,7 +203,9 @@ function mapDetails(d) {
 }
 
 function getFilteredPokemon() {
-  if (currentSearch.length < 3) return cache;
+  if (currentSearch === "") return cache;
+
+  if (currentSearch === "__HIDE__") return [];
 
   return cache.filter(
     (p) =>
@@ -189,7 +241,13 @@ function render() {
 
 async function init() {
   hideAttention();
-  renderTicker();
+
+  try {
+    await loadAllPokemonList();
+  } catch (err) {
+    console.error("Fehler beim Laden der Pokemon-Liste", err);
+  }
+
   await loadMore();
 }
 
