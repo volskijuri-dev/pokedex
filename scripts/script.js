@@ -1,4 +1,5 @@
 const API = "https://pokeapi.co/api/v2";
+const MAX_POKEMON = 150;
 
 const pokedexEl = document.getElementById("pokedex");
 const loadBtn = document.getElementById("loadButton");
@@ -90,9 +91,10 @@ function toggleFavorite(id) {
 }
 
 async function loadMissingPokemon(value) {
+  if (cache.length >= MAX_POKEMON) return;
 
   const matches = allPokemonList
-    .filter(p => p.name.includes(value))
+    .filter((p) => p.name.includes(value))
     .slice(0, 20);
 
   if (!matches.length) return;
@@ -100,15 +102,16 @@ async function loadMissingPokemon(value) {
   showLoader();
 
   try {
-    const details = await Promise.all(matches.map(p => fetchJson(p.url)));
+    const details = await Promise.all(matches.map((p) => fetchJson(p.url)));
     const mapped = details.map(mapDetails);
 
-    mapped.forEach(pokemon => {
-      if (!cache.some(c => c.id === pokemon.id)) {
+    mapped.forEach((pokemon) => {
+      if (cache.length >= MAX_POKEMON) return;
+
+      if (!cache.some((c) => c.id === pokemon.id)) {
         cache.push(pokemon);
       }
     });
-
   } catch (err) {
     console.error(err);
     showAttention("Fehler bei der Suche.");
@@ -118,55 +121,46 @@ async function loadMissingPokemon(value) {
 }
 
 async function searchPokemon() {
-
   const value = searchEl.value.trim().toLowerCase();
 
   if (value.length === 0) {
     currentSearch = "";
+    searchResultsEl.innerHTML = "";
     searchResultsEl.classList.add("hidden");
     pokedexEl.classList.remove("hidden");
     loadBtn.style.display = nextUrl ? "block" : "none";
+    render();
     return;
   }
 
   if (value.length < 3) {
-    searchResultsEl.classList.remove("hidden");
+    currentSearch = "";
     pokedexEl.classList.add("hidden");
-    searchResultsEl.innerHTML = "";
+    searchResultsEl.classList.remove("hidden");
+    searchResultsEl.innerHTML = `<p class="no-results">Bitte mindestens 3 Buchstaben eingeben.</p>`;
+    loadBtn.style.display = "none";
     return;
   }
 
+  currentSearch = value;
   loadBtn.style.display = "none";
 
   let results = cache.filter(
-    p => p.name.includes(value) || String(p.id).includes(value)
+    (p) => p.name.includes(value) || String(p.id).includes(value)
   );
 
   if (!results.length && allPokemonList.length) {
     await loadMissingPokemon(value);
 
     results = cache.filter(
-      p => p.name.includes(value) || String(p.id).includes(value)
+      (p) => p.name.includes(value) || String(p.id).includes(value)
     );
   }
 
   pokedexEl.classList.add("hidden");
   searchResultsEl.classList.remove("hidden");
-
   renderSearchResults(results);
 }
-
-function renderSearchResults(list) {
-
-  if (!list.length) {
-    searchResultsEl.innerHTML = `<p class="no-results">Kein Pokémon gefunden.</p>`;
-    return;
-  }
-
-  searchResultsEl.innerHTML = list.map(cardTemplate).join("");
-  applyTypeGradients();
-}
-
 
 async function fetchJson(url) {
   const res = await fetch(url);
@@ -216,15 +210,7 @@ function mapDetails(d) {
 }
 
 function getFilteredPokemon() {
-  if (currentSearch === "") return cache;
-
-  if (currentSearch === "__HIDE__") return [];
-
-  return cache.filter(
-    (p) =>
-      p.name.includes(currentSearch) ||
-      String(p.id).includes(currentSearch)
-  );
+  return cache;
 }
 
 function applyTypeGradients() {
@@ -241,14 +227,19 @@ function applyTypeGradients() {
 }
 
 function render() {
-  const list = getFilteredPokemon();
+  const sorted = [...cache].sort((a, b) => a.id - b.id);
+  pokedexEl.innerHTML = sorted.map(cardTemplate).join("");
+  applyTypeGradients();
+}
 
-  if (currentSearch.length >= 3 && list.length === 0) {
-    pokedexEl.innerHTML = `<p class="no-results">Kein Pokémon gefunden.</p>`;
+function renderSearchResults(list) {
+  if (!list.length) {
+    searchResultsEl.innerHTML = `<p class="no-results">Kein Pokémon gefunden.</p>`;
     return;
   }
 
-  pokedexEl.innerHTML = list.map(cardTemplate).join("");
+  const sorted = [...list].sort((a, b) => a.id - b.id);
+  searchResultsEl.innerHTML = sorted.map(cardTemplate).join("");
   applyTypeGradients();
 }
 
@@ -267,21 +258,33 @@ async function init() {
 async function loadMore() {
   if (!nextUrl) return;
 
+  if (cache.length >= MAX_POKEMON) {
+    loadBtn.style.display = "none";
+    return;
+  }
+
   showLoader();
 
   const startTime = Date.now();
   const minTime = 1200;
+  let loadedSuccessfully = false;
 
   try {
     const page = await fetchJson(nextUrl);
     nextUrl = page.next;
 
-    loadBtn.style.display = nextUrl ? "block" : "none";
-
     const details = await Promise.all(page.results.map((p) => fetchJson(p.url)));
     const mapped = details.map(mapDetails);
 
     cache.push(...mapped);
+
+    if (cache.length >= MAX_POKEMON) {
+      cache = cache.slice(0, MAX_POKEMON);
+      nextUrl = null;
+    }
+
+    loadBtn.style.display = nextUrl ? "block" : "none";
+    loadedSuccessfully = true;
   } catch (err) {
     console.error(err);
     showAttention("Fehler beim Laden. Bitte probiere es nochmal.");
@@ -293,8 +296,16 @@ async function loadMore() {
     }
 
     hideLoader();
-    render();
-    renderTicker();
+
+    if (loadedSuccessfully) {
+      if (currentSearch === "") {
+        searchResultsEl.classList.add("hidden");
+        pokedexEl.classList.remove("hidden");
+      }
+
+      render();
+      renderTicker();
+    }
   }
 }
 

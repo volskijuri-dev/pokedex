@@ -148,29 +148,18 @@ async function openDialog(id) {
 
 function renderTicker() {
   const ticker = document.getElementById("pokemonTicker");
+  if (!cache.length) return;
 
-  const html = cache.map((p) => `
+  const items = cache.map((p) => `
     <div class="ticker-item">
       <img src="${p.sprite}" alt="${p.name}">
       <span>${p.nameCap}</span>
     </div>
   `).join("");
 
-  ticker.innerHTML = html + html;
-}
-
-function renderTicker() {
-const ticker = document.getElementById("pokemonTicker");
-if (!cache.length) return;
-const items = cache.map(p => `
-    <div class="ticker-item">
-      <img src="${p.sprite}" alt="${p.name}">
-      <span>${p.nameCap}</span>
-    </div>
-  `).join("");
   ticker.innerHTML = items + items;
+
   const itemCount = cache.length;
   const duration = Math.max(40, itemCount * 4);
-
   ticker.style.animationDuration = `${duration}s`;
 }
